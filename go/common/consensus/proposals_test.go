@@ -1242,7 +1242,7 @@ func TestBuildSafeProposal_BuildProposalError(t *testing.T) {
 	require.EqualError(t, err, "buildProposal: no suitable candidate")
 }
 
-func TestBuildSafeProposal_BestRuleSelected(t *testing.T) {
+func TestBuildSafeProposal_OutgoingRuleSelected(t *testing.T) {
 	// One node is behind; the others are at the higher rule.
 	// The higher rule's cohort and policy must govern quorum.
 	zone1 := poolerIDs.zone1
@@ -1256,7 +1256,7 @@ func TestBuildSafeProposal_BestRuleSelected(t *testing.T) {
 		makeStatus(zone1.c, oldRule, revocation(5)), // behind
 	}
 
-	// Only a and b are eligible (at bestRule); callback picks a.
+	// Only a and b are eligible (at outgoingRule); callback picks a.
 	// proposedRule uses the revocation term (5) since validateProposal requires it to match.
 	proposedRule := makeRule(ruleNum(5, 0), atLeast(2), cohort...)
 	var gotResult RecruitmentResult
@@ -1274,7 +1274,7 @@ func TestBuildSafeProposal_BestRuleSelected(t *testing.T) {
 	require.NoError(t, err)
 	require.NotNil(t, proposal)
 	assert.Equal(t, int64(3), gotResult.OutgoingRule.GetRuleNumber().GetCoordinatorTerm())
-	assert.Len(t, gotResult.EligibleLeaders, 2, "only nodes at bestRule are eligible")
+	assert.Len(t, gotResult.EligibleLeaders, 2, "only nodes at outgoingRule are eligible")
 	// Leader must be a or b (both at newRule), not c.
 	leaderName := proposal.GetProposalLeader().GetId().GetName()
 	assert.NotEqual(t, "pooler-c", leaderName)
